@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "name": "retro-print-poster",
+  "displayName": "诗意复古海报",
+  "version": "1.0.0",
+  "description": "上传一张照片，用 MiniMax H3 Image 做成 3:4 竖版诗意复古印刷海报：暖白纸色留白里放两段英文小诗，横跨画面的巨大衬线大字从照片取色，真实主体从原场景向上穿过大字，叠加青/洋红/黄彩色半调网点，右上角附 ORIGINAL 原图缩略图。单词、诗句、配色根据照片自动拟定，也可自己指定；支持一次多张照片批量出图，逐张质检拼写与画面后交付 2K 成片。",
+  "author": "MiniMax",
+  "icon": "icon.png",
+  "category": "Studio",
+  "exampleQueries": [
+    "把这张花的照片做成复古印刷海报",
+    "用这几张旅行照做一套诗意复古海报，大字你来定",
+    "把我的照片做成复古杂志海报，大字用 BLOOM，红色"
+  ],
+  "apps": [],
+  "mcpServers": [],
+  "skills": [
+    "skills/retro-print-poster/SKILL.md"
+  ]
+}
