@@ -41,6 +41,7 @@ description: "诗意复古印刷海报（MiniMax H3 Image）。用户想把照�
 
 - 单词和诗句必须原样写进提示词并加英文双引号，模型照抄引号内的文字，拼写才可靠。
 - 用户补充的要求（比如"大字放低一点""不要缩略图""诗句换成中文"）写在模板末尾的"补充要求"一行，并优先于模板默认值。用户要求中文诗句时，诗句改用中文并加中文引号，字体改为小号宋体。
+- 补充要求和模板正文不能互相矛盾。用户不要缩略图时，除了写进"补充要求"，还要删掉模板里"右上角放一张…"整段，并把"整体克制、诗意…"一段里的 `和 "ORIGINAL"` 去掉；第 5 步跳过缩略图和 `ORIGINAL` 两项检查。
 
 ## 4. 生成
 
@@ -62,8 +63,41 @@ description: "诗意复古印刷海报（MiniMax H3 Image）。用户想把照�
 
 - `output_file_path` 用 `posters/<YYYYMMDD-HHMM>/<单词小写>.png`，时间取当前本地时间。
 - `aspect_ratio` 固定 `3:4`，`resolution` 固定 `2K`。
-- 计费提示：活动期内（至 11 月 20 日）MiniMax Code 每个账号共有 10 次免费图片生成，每张图计 1 次，用完后按 H3 Image 正常计费。用户一次要出 4 张以上时，开工前用一句话告知张数和计次。
+- 计费提示：每张图计 1 次。今天的日期在 2026 年 11 月 20 日（含）之前时，可以告诉用户活动期内 MiniMax Code 每个账号共有 10 次免费图片生成，用完后按 H3 Image 正常计费；晚于这一天活动已结束，只说明每张图按 H3 Image 正常计费，不要再提免费次数。用户一次要出 4 张以上时，开工前用一句话告知张数和计次。
 - 调用失败时如实说明原因（例如内容审核、额度用尽、参考图读取失败），不要换用其他生图工具或网上图片充数。
+
+当前会话的工具列表里没有 `image_synthesize` 时，改走 `mcode-tools` 的 Connector 工具 `connector__matrix__generate_image`（同一个 H3 Image），不要用 `tool_search` 另找生图工具：
+
+1. 加载 `mcode-tools-master` Skill（运行任何 `mcode-tools` 命令前必须先加载）。
+2. 每张照片上传一次拿临时 URL（1 小时有效）：`mcode-tools upload_temp_url posters/source/flower.jpg`，取返回 JSON 的 `temp_url`。
+3. 把全部 request 写进 `posters/<YYYYMMDD-HHMM>/args.json` 后一次提交，命令超时至少给 600 秒：
+
+   ```json
+   {
+     "requests": [
+       {
+         "prompt": "<替换后的完整提示词>",
+         "input_urls": ["<temp_url>"],
+         "output_file": "bloom",
+         "aspect_ratio": "3:4",
+         "resolution": "2K"
+       }
+     ]
+   }
+   ```
+
+   ```bash
+   mcode-tools connector call connector__matrix__generate_image --args-file posters/<YYYYMMDD-HHMM>/args.json
+   ```
+
+   这条路径的字段只有 `prompt`、`input_urls`、`output_file`、`aspect_ratio`、`resolution`；不要传 `input_file_paths`、`output_file_path`。
+4. 结果里 `success_items[]` 给出 `node_id` 和 `file_name`（扩展名以它为准），逐个下载到 `posters/<YYYYMMDD-HHMM>/`，不要自己拼 OSS/CDN 地址：
+
+   ```bash
+   url=$(mcode-tools get_asset_url <node_id> | python3 -c 'import sys,json;print(json.load(sys.stdin)["download_url"])')
+   curl -sSL "$url" -o "posters/<YYYYMMDD-HHMM>/<file_name>"
+   ```
+5. `failed_items[]` 里是"request failed; please retry"这类临时错误时，只把失败的那几条重新提交一次，成功的不重复生成。
 
 ## 5. 逐张质检
 
@@ -72,7 +106,7 @@ description: "诗意复古印刷海报（MiniMax H3 Image）。用户想把照�
 - **文字**：大字拼写与方案完全一致，整词在画面内、首尾字母没有被画幅切掉，字母完整可读，被主体遮挡的笔画不超过约三分之一；两段小诗逐词核对拼写，没有多出的标题、乱码或水印；缩略图下方是准确的 `ORIGINAL`。
 - **主体**：从下方原场景连续长上来、穿过大字并越过字顶；比例正常，没有被拉长的头颈、扭曲的肢体、漂浮或断开的物体，没有凭空多出的物体。
 - **画面衔接**：上下是一张连续画面，照片上沿由网点渐疏散入暖白；没有矩形拼接、水平分界线、笔直或撕纸状横切边、抠图白边或生硬渐变；能看到彩色圆形网点，不是普通噪点或划痕；上方留白相对干净。
-- **缩略图**：在右上角，完整展示原图、未裁切，没有压住诗句或主体。
+- **缩略图**：在右上角，完整展示原图、未裁切，没有压住诗句或主体（用户不要缩略图时改为确认画面里没有缩略图和 `ORIGINAL`）。
 - **输出形式**：只有一张海报，不是拼图、样机或带相框的展示图。
 
 有问题的那张，告诉用户问题在哪，询问是否重做这一张（重做同样计 1 次）；重做时在"补充要求"里针对问题加约束（例如拼错就再强调单词逐字母拼写 `B-L-O-O-M`，字被切边就写明整词左右留边，主体没穿字就写明主体顶部必须高于大字顶边）。免费额度按次计，**不要未经用户同意自动重做**；用户说了"直接做 / 你看着办"也只代表方案不用问，不代表可以重做。
