@@ -1,0 +1,19 @@
+[
+  {"query": "把这张花的照片做成复古印刷海报", "should_trigger": true},
+  {"query": "小红书上那个“提示词美完了”的同款海报，用我这张照片做一张", "should_trigger": true},
+  {"query": "想要一张大字穿插、主体从字后面长出来的诗意海报", "should_trigger": true},
+  {"query": "Turn this photo into a halftone poster with a big serif word", "should_trigger": true},
+  {"query": "这三张旅行照各做一张复古杂志风海报，单词你定", "should_trigger": true},
+  {"query": "做一张右上角带 ORIGINAL 缩略图的那种海报", "should_trigger": true},
+  {"query": "用这张天鹅的照片做诗意海报，诗句换成中文", "should_trigger": true},
+  {"query": "把我的自拍做成复古海报，大字用 GRACE", "should_trigger": true},
+
+  {"query": "设计一张复古风格的音乐节宣传海报，要写上演出阵容、时间和地点", "should_trigger": false},
+  {"query": "把这张照片转成黑白报纸网点效果，别的都不要加", "should_trigger": false},
+  {"query": "给我们奶茶店做一张新品上市海报，要有价格和二维码", "should_trigger": false},
+  {"query": "帮我为这张照片写一首英文小诗", "should_trigger": false},
+  {"query": "把这张照片修复成老照片的质感，去掉划痕", "should_trigger": false},
+  {"query": "用这张自拍做一张职业照", "should_trigger": false},
+  {"query": "做一个复古风格的 PPT 封面模板", "should_trigger": false},
+  {"query": "把这 9 张照片拼成一张九宫格拼图发朋友圈", "should_trigger": false}
+]
